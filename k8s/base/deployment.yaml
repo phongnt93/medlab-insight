@@ -28,7 +28,7 @@ spec:
         runAsGroup: 10001
       containers:
         - name: medlab-insight
-          image: nguyenphong8852/medlab-insight:bootstrap
+          image: nguyenphong8852/medlab-insight:1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

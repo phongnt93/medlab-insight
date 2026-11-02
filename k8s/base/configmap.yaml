@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: medlab-insight-config
+  namespace: medlab
+data:
+  MEDLAB_LLM_MODE: "auto"
+  GEMINI_MODEL: "gemini-3.5-flash"
+  GEMINI_TIMEOUT_SECONDS: "20"
+  GEMINI_MAX_RETRIES: "2"
+  MEDLAB_RISK_MODEL_PATH: "/app/artifacts/risk_model.joblib"
+  MEDLAB_RISK_MODEL_META_PATH: "/app/artifacts/model_card.json"
+  MEDLAB_MAX_NOTE_CHARS: "500"
+  MEDLAB_LOG_LEVEL: "INFO"

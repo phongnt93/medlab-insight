@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra dev
+
+      - name: Lint
+        run: |
+          uv run ruff check src app training tests
+          uv run ruff format --check src app training tests
+
+      - name: Test
+        env:
+          MEDLAB_LLM_MODE: offline
+        run: uv run pytest --cov --cov-report=term-missing
+
+      - name: Training smoke test
+        run: uv run python -m training.train --samples 1500 --no-mlflow
+
+      - name: Build image
+        run: docker build -t medlab-insight:ci .

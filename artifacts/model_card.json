@@ -1,0 +1,62 @@
+{
+  "model_version": "risk-synth-0.1.0",
+  "trained_at": "2026-10-30T08:35:19+00:00",
+  "dataset": "synthetic",
+  "target": "simulated need for medical review (moderate or worse abnormality)",
+  "age_range": "18-85",
+  "n_samples": 6000,
+  "seed": 42,
+  "features": [
+    "age_years",
+    "hemoglobin_g_l",
+    "wbc_10e9_l",
+    "platelets_10e9_l",
+    "fasting_glucose_mmol_l",
+    "hba1c_percent",
+    "creatinine_umol_l",
+    "egfr_ml_min_1_73m2",
+    "alt_u_l",
+    "ast_u_l",
+    "total_cholesterol_mmol_l",
+    "ldl_mmol_l",
+    "hdl_mmol_l",
+    "triglycerides_mmol_l",
+    "crp_mg_l",
+    "sodium_mmol_l",
+    "potassium_mmol_l",
+    "ph",
+    "specific_gravity",
+    "wbc_per_hpf",
+    "rbc_per_hpf",
+    "urine_protein",
+    "urine_glucose",
+    "urine_ketones",
+    "urine_blood",
+    "urine_leukocyte_esterase",
+    "nitrite_positive",
+    "sex"
+  ],
+  "metrics": {
+    "roc_auc": 0.8992685288806901,
+    "accuracy": 0.8541666666666666,
+    "precision": 0.8779527559055118,
+    "recall": 0.7978533094812165,
+    "f1": 0.8359887535145267,
+    "brier": 0.11616297424716185,
+    "positive_rate": 0.4655,
+    "train_size": 4800,
+    "test_size": 1200
+  },
+  "decision_threshold": 0.5,
+  "library_versions": {
+    "scikit-learn": "1.7.2",
+    "python": "3.12.15"
+  },
+  "intended_use": "MLOps demo; decision support only, not a diagnosis and not for clinical use.",
+  "limitations": [
+    "Huấn luyện hoàn toàn trên dữ liệu tổng hợp, chưa được kiểm định lâm sàng.",
+    "Chỉ áp dụng cho người trưởng thành 18-85 tuổi.",
+    "Không bao gồm bệnh sử, thuốc, thai kỳ, triệu chứng lâm sàng hoặc xét nghiệm khác.",
+    "Không thay thế bác sĩ; không dùng để ra quyết định điều trị."
+  ]
+}

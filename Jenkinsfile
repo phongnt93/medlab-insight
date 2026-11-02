@@ -474,11 +474,8 @@ ${ai.summary}
 Confidence: ${ai.confidence}
 """
 
-                    if (ai.severity in ['HIGH', 'CRITICAL']) {
-                        currentBuild.result = 'FAILURE'
-                    } else if (ai.severity == 'MEDIUM') {
-                        currentBuild.result = 'UNSTABLE'
-                    }
+                    // AI chỉ tư vấn: kết quả build do runTracked() quyết định,
+                    // tránh việc AI chấm severity cao làm đỏ build đã thành công.
 
                     // Escape HTML để nội dung AI trả về không làm vỡ trang
                     def esc = { v ->

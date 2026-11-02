@@ -85,18 +85,30 @@ Chuẩn bị trên Jenkins:
 - Kubernetes agent (pod template khai báo sẵn trong Jenkinsfile, không cần cài Python trên agent).
 - Credentials: `dockerhub-credentials`, `github-credentials`, `argocd-credentials`, `gemini-api-key`.
 - Shared library `jenkins-shared-library` có hàm `updateK8sManifest`.
-- ArgoCD Application `medlab-insight` trỏ về path `k8s/base`, bật Auto-Sync + Self-Heal.
+- ArgoCD Application `medlab-insight` trỏ về path `k8s/base`, bật Auto-Sync + Self-Heal:
+
+```bash
+kubectl apply -f k8s/argocd/application.yaml
+```
+
 - Repo đã push lên GitHub (pipeline commit tag mới vào `k8s/base/deployment.yaml`).
+
+AI analysis chỉ mang tính tư vấn (mô tả + HTML report); kết quả build do các stage
+thực tế quyết định, không bị AI chấm severity cao làm đỏ build.
 
 Image đích mặc định `nguyenphong8852/medlab-insight:<BUILD_NUMBER>`. Nếu Docker Hub
 account khác, sửa `DOCKER_IMAGE_NAME` trong `Jenkinsfile` và `image:` trong
 `k8s/base/deployment.yaml`. Tag `bootstrap` ban đầu sẽ được thay bằng tag build đầu tiên.
 
-Local OrbStack vẫn dùng overlay riêng, không bị pipeline ghi đè:
+Local OrbStack vẫn dùng overlay riêng:
 
 ```bash
 kubectl apply -k k8s/overlays/local
 ```
+
+Lưu ý: khi ArgoCD Application đang bật Auto-Sync + Self-Heal, nó sẽ kéo image về
+tag CI (`k8s/base/deployment.yaml`). Muốn test overlay `:local` lâu dài thì tắt
+auto-sync (`argocd app set medlab-insight --sync-policy none`) trước khi apply.
 
 ## Cấu trúc
 
@@ -107,6 +119,7 @@ training/       synthetic data + train + MLflow
 tests/          unit/integration/UI smoke tests
 k8s/base        manifests gốc (ArgoCD sync)
 k8s/overlays    override cho local
+k8s/argocd      ArgoCD Application manifest
 Jenkinsfile     pipeline Jenkins + ArgoCD + Gemini
 artifacts/      model.joblib + model_card.json
 ```

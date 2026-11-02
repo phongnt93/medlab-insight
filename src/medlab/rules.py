@@ -364,7 +364,7 @@ def _composite_findings(
                     )
                     if part
                 ),
-                reference_display="LDL-C <3,4; TG <1,7; HDL-C >1,0 (nam)/>1,3 (nữ)",
+                reference_display="LDL-C <2,59; TG <1,7; HDL-C ≥1,55",
             )
 
     sg = urine.specific_gravity
@@ -437,7 +437,7 @@ def _composite_findings(
                 "Glucose đói thấp; nếu có run rẩy, vã mồ hôi, lú lẫn hoặc ngất cần xử trí và khám ngay."
             ),
             value_display=f"{glucose:g} mmol/L",
-            reference_display="3,9–5,6 mmol/L",
+            reference_display="4,1–5,9 mmol/L",
             red_flag="Hạ đường huyết (glucose ≤3,0 mmol/L) — cần theo dõi và đánh giá y tế.",
         )
 

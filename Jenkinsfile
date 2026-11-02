@@ -397,11 +397,20 @@ ${log}
                     )
                 ]) {
                     sh '''
+set +e
 curl -sS "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent" \
   -H "x-goog-api-key: ${GEMINI_API_KEY}" \
   -H "Content-Type: application/json" \
   --data-binary @ai-request.json \
   -o ai-response.json
+CURL_RC=$?
+set -e
+
+# Mất mạng/DNS tới Google từ agent pod -> AI bỏ qua, không làm đỏ build
+if [ "$CURL_RC" -ne 0 ]; then
+  echo "curl to Gemini failed (exit $CURL_RC) – AI analysis will be skipped."
+  echo '{"error":{"message":"curl failed (network/DNS)"}}' > ai-response.json
+fi
 
 echo "========== RAW RESPONSE =========="
 cat ai-response.json
@@ -457,7 +466,9 @@ cat ai-response.json
                     try {
                         ai = readJSON text: cleaned
                     } catch (Exception e) {
-                        error("AI output is not valid JSON: ${e.message}\nOutput:\n${cleaned}")
+                        // AI chỉ tư vấn: JSON hỏng cũng không được làm đỏ build
+                        unstable("AI analysis skipped: output is not valid JSON (${e.message})")
+                        return
                     }
 
                     writeJSON(

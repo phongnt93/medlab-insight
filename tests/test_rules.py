@@ -149,3 +149,43 @@ def test_nitrite_without_pyuria_is_not_uti(normal_patient: PatientInput) -> None
     codes = _codes(patient)
     assert "suspected_uti" not in codes
     assert "urine_nitrite" in codes
+
+
+def test_monocytosis_is_mild(normal_patient: PatientInput) -> None:
+    patient = normal_patient.model_copy(
+        update={
+            "blood": BloodPanel(wbc_10e9_l=10.0, mono_percent=10.9),
+            "urine": UrinePanel(),
+        }
+    )
+    result = evaluate_rules(patient)
+    mono = next(f for f in result.findings if f.code == "blood_mono_percent")
+    assert mono.severity == Severity.MILD
+    assert result.urgent is False
+
+
+def test_elevated_bun_is_moderate(normal_patient: PatientInput) -> None:
+    patient = normal_patient.model_copy(
+        update={"blood": BloodPanel(bun_mmol_l=20.5), "urine": UrinePanel()}
+    )
+    result = evaluate_rules(patient)
+    bun = next(f for f in result.findings if f.code == "blood_bun_mmol_l")
+    assert bun.severity == Severity.MODERATE
+
+
+def test_hyperuricemia_is_mild(normal_patient: PatientInput) -> None:
+    patient = normal_patient.model_copy(
+        update={"blood": BloodPanel(uric_acid_umol_l=455), "urine": UrinePanel()}
+    )
+    result = evaluate_rules(patient)
+    uric = next(f for f in result.findings if f.code == "blood_uric_acid_umol_l")
+    assert uric.severity == Severity.MILD
+
+
+def test_elevated_mcv_is_mild(normal_patient: PatientInput) -> None:
+    patient = normal_patient.model_copy(
+        update={"blood": BloodPanel(mcv_fl=104.0), "urine": UrinePanel()}
+    )
+    result = evaluate_rules(patient)
+    mcv = next(f for f in result.findings if f.code == "blood_mcv_fl")
+    assert mcv.severity == Severity.MILD

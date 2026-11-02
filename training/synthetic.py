@@ -85,12 +85,58 @@ def generate_dataset(n_samples: int = 6000, seed: int = 42) -> SyntheticDataset:
 
         total_cholesterol = rng.normal(4.8, 0.7)
         ldl = max(0.4, total_cholesterol * 0.6 + rng.normal(0, 0.35))
-        hdl = rng.normal(1.15 if sex == Sex.MALE else 1.48, 0.22)
+        hdl = rng.normal(1.35 if sex == Sex.MALE else 1.55, 0.22)
         triglycerides = rng.normal(1.2, 0.4)
         if dyslipidemia:
             ldl += rng.uniform(0.7, 2.0)
             triglycerides += rng.uniform(0.6, 2.8)
             hdl -= rng.uniform(0.15, 0.45)
+
+        bun = rng.normal(5.4, 1.3)
+        uric_acid = rng.normal(320, 70)
+        if ckd:
+            bun *= rng.uniform(1.8, 4.0)
+            uric_acid *= rng.uniform(1.2, 1.8)
+        if dehydration:
+            bun += rng.uniform(1.5, 5.0)
+            uric_acid += rng.uniform(30, 80)
+
+        rbc = rng.normal(4.95 if female else 5.15, 0.35)
+        if anemia:
+            rbc -= rng.uniform(0.5, 1.8)
+        mcv = rng.normal(89.0, 4.0)
+        if anemia:
+            mcv += rng.uniform(-6, 8)
+        mch = _clip(mcv * 0.335, 20, 40)
+        mchc = _clip(rng.normal(335, 8) + (10 if anemia else 0), 280, 380)
+        rdw = rng.normal(13.0, 0.9)
+        if anemia:
+            rdw += rng.uniform(1.5, 4.0)
+        mpv = rng.normal(7.7, 0.9)
+        hct = _clip(rbc * rng.normal(0.088, 0.004), 0.15, 0.75)
+
+        neut_pct = _clip(rng.normal(58, 7) + (10 if infection else 0), 5, 98)
+        lym_pct = _clip(rng.normal(32, 6) - (6 if infection else 0), 5, 90)
+        mono_pct = _clip(rng.normal(5.5, 1.8) + (2 if infection else 0), 0.5, 45)
+        eo_pct = _clip(abs(rng.normal(2.2, 1.4)), 0, 45)
+        baso_pct = _clip(abs(rng.normal(0.4, 0.2)), 0, 15)
+        pct_total = neut_pct + lym_pct + mono_pct + eo_pct + baso_pct
+        neut_pct = round(neut_pct / pct_total * 100, 1)
+        lym_pct = round(lym_pct / pct_total * 100, 1)
+        mono_pct = round(mono_pct / pct_total * 100, 1)
+        eo_pct = round(eo_pct / pct_total * 100, 1)
+        baso_pct = round(baso_pct / pct_total * 100, 1)
+        neut_abs = round(wbc * neut_pct / 100, 1)
+        lym_abs = round(wbc * lym_pct / 100, 1)
+        mono_abs = round(wbc * mono_pct / 100, 1)
+        eo_abs = round(wbc * eo_pct / 100, 2)
+        baso_abs = round(wbc * baso_pct / 100, 2)
+
+        chloride = rng.normal(103, 2.4)
+        if dehydration:
+            chloride += rng.uniform(2, 7)
+        if dka:
+            chloride -= rng.uniform(3, 10)
 
         crp = max(0.1, rng.normal(1.4, 1.0))
         if infection:
@@ -156,6 +202,26 @@ def generate_dataset(n_samples: int = 6000, seed: int = 42) -> SyntheticDataset:
             "crp_mg_l": _clip(crp, 0, 1000),
             "sodium_mmol_l": _clip(sodium, 80, 220),
             "potassium_mmol_l": _clip(potassium, 0, 15),
+            "chloride_mmol_l": _clip(chloride, 50, 180),
+            "bun_mmol_l": _clip(bun, 0, 80),
+            "uric_acid_umol_l": _clip(uric_acid, 0, 1500),
+            "rbc_t_l": _clip(rbc, 0, 15),
+            "hct_l_l": _clip(hct, 0, 0.8),
+            "mcv_fl": _clip(mcv, 40, 160),
+            "mch_pg": _clip(mch, 10, 60),
+            "mchc_g_l": _clip(mchc, 250, 450),
+            "rdw_cv_percent": _clip(rdw, 5, 50),
+            "mpv_fl": _clip(mpv, 0, 50),
+            "neut_percent": _clip(neut_pct, 0, 100),
+            "lym_percent": _clip(lym_pct, 0, 100),
+            "mono_percent": _clip(mono_pct, 0, 100),
+            "eo_percent": _clip(eo_pct, 0, 100),
+            "baso_percent": _clip(baso_pct, 0, 100),
+            "neut_abs_10e9_l": _clip(neut_abs, 0, 100),
+            "lym_abs_10e9_l": _clip(lym_abs, 0, 100),
+            "mono_abs_10e9_l": _clip(mono_abs, 0, 100),
+            "eo_abs_10e9_l": _clip(eo_abs, 0, 100),
+            "baso_abs_10e9_l": _clip(baso_abs, 0, 100),
             "ph": _clip(ph, 0, 14),
             "specific_gravity": _clip(specific_gravity, 1.0, 1.06),
             "wbc_per_hpf": _clip(wbc_hpf, 0, 10000),
@@ -208,6 +274,8 @@ def generate_dataset(n_samples: int = 6000, seed: int = 42) -> SyntheticDataset:
                 uti,
                 dehydration and full["sodium_mmol_l"] > 150,
                 full["ldl_mmol_l"] > 4.9 or full["triglycerides_mmol_l"] > 5.6,
+                full["uric_acid_umol_l"] > 475,
+                full["bun_mmol_l"] >= 17,
                 full["fasting_glucose_mmol_l"] <= 3.0 or full["fasting_glucose_mmol_l"] >= 25,
                 full["potassium_mmol_l"] <= 2.8 or full["potassium_mmol_l"] >= 6.0,
                 full["sodium_mmol_l"] <= 125 or full["sodium_mmol_l"] >= 155,

@@ -99,6 +99,26 @@ def _build_patient() -> PatientInput:
         crp_mg_l=_state_num("blood_crp"),
         sodium_mmol_l=_state_num("blood_na"),
         potassium_mmol_l=_state_num("blood_k"),
+        chloride_mmol_l=_state_num("blood_cl"),
+        bun_mmol_l=_state_num("blood_bun"),
+        uric_acid_umol_l=_state_num("blood_uric"),
+        rbc_t_l=_state_num("blood_rbc"),
+        hct_l_l=_state_num("blood_hct"),
+        mcv_fl=_state_num("blood_mcv"),
+        mch_pg=_state_num("blood_mch"),
+        mchc_g_l=_state_num("blood_mchc"),
+        rdw_cv_percent=_state_num("blood_rdw"),
+        mpv_fl=_state_num("blood_mpv"),
+        neut_percent=_state_num("blood_neut_pct"),
+        lym_percent=_state_num("blood_lym_pct"),
+        mono_percent=_state_num("blood_mono_pct"),
+        eo_percent=_state_num("blood_eo_pct"),
+        baso_percent=_state_num("blood_baso_pct"),
+        neut_abs_10e9_l=_state_num("blood_neut_abs"),
+        lym_abs_10e9_l=_state_num("blood_lym_abs"),
+        mono_abs_10e9_l=_state_num("blood_mono_abs"),
+        eo_abs_10e9_l=_state_num("blood_eo_abs"),
+        baso_abs_10e9_l=_state_num("blood_baso_abs"),
     )
     urine = UrinePanel(
         ph=_state_num("urine_ph"),
@@ -266,15 +286,21 @@ with st.form("lab_form"):
 
     blood_tab, urine_tab = st.tabs(["Xét nghiệm máu", "Xét nghiệm nước tiểu"])
     with blood_tab:
-        b1, b2, b3 = st.columns(3)
-        with b1:
-            _num("blood_hb", "Hemoglobin (g/L)", min_value=0, max_value=300, step=1)
-            _num("blood_wbc", "Bạch cầu WBC (×10⁹/L)", min_value=0, max_value=300, step=0.1)
-            _num("blood_plt", "Tiểu cầu PLT (×10⁹/L)", min_value=0, max_value=3000, step=1)
+        st.subheader("Sinh hóa")
+        s1, s2, s3 = st.columns(3)
+        with s1:
             _num("blood_glucose", "Glucose đói (mmol/L)", min_value=0, max_value=100, step=0.1)
             _num("blood_hba1c", "HbA1c (%)", min_value=0, max_value=25, step=0.1)
-            _num("blood_creatinine", "Creatinine (µmol/L)", min_value=0, max_value=3000, step=1)
-        with b2:
+            _num("blood_bun", "Uré / BUN (mmol/L)", min_value=0, max_value=80, step=0.01)
+            _num("blood_uric", "Acid uric (µmol/L)", min_value=0, max_value=1500, step=1)
+        with s2:
+            _num(
+                "blood_chol", "Cholesterol toàn phần (mmol/L)", min_value=0, max_value=50, step=0.01
+            )
+            _num("blood_tg", "Triglycerid (mmol/L)", min_value=0, max_value=60, step=0.01)
+            _num("blood_hdl", "HDL-C (mmol/L)", min_value=0, max_value=15, step=0.01)
+            _num("blood_ldl", "LDL-C (mmol/L)", min_value=0, max_value=30, step=0.01)
+        with s3:
             _num(
                 "blood_egfr",
                 "eGFR (mL/phút/1,73m²)",
@@ -283,18 +309,50 @@ with st.form("lab_form"):
                 step=1,
                 help_text="Để trống để tự ước tính bằng CKD-EPI 2021 (người ≥18 tuổi).",
             )
+            _num("blood_creatinine", "Creatinine (µmol/L)", min_value=0, max_value=3000, step=1)
             _num("blood_alt", "ALT / SGPT (U/L)", min_value=0, max_value=20000, step=1)
             _num("blood_ast", "AST / SGOT (U/L)", min_value=0, max_value=20000, step=1)
-            _num(
-                "blood_chol", "Cholesterol toàn phần (mmol/L)", min_value=0, max_value=50, step=0.1
-            )
-            _num("blood_ldl", "LDL-C (mmol/L)", min_value=0, max_value=30, step=0.1)
-            _num("blood_hdl", "HDL-C (mmol/L)", min_value=0, max_value=15, step=0.1)
-        with b3:
-            _num("blood_tg", "Triglycerid (mmol/L)", min_value=0, max_value=60, step=0.1)
             _num("blood_crp", "CRP (mg/L)", min_value=0, max_value=1000, step=0.1)
+
+        st.subheader("Điện giải")
+        e1, e2, e3 = st.columns(3)
+        with e1:
             _num("blood_na", "Natri Na⁺ (mmol/L)", min_value=80, max_value=220, step=1)
+        with e2:
             _num("blood_k", "Kali K⁺ (mmol/L)", min_value=0, max_value=15, step=0.1)
+        with e3:
+            _num("blood_cl", "Clo Cl⁻ (mmol/L)", min_value=50, max_value=180, step=1)
+
+        st.subheader("Công thức máu (tổng phân tích tế bào máu)")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            _num("blood_hb", "Hemoglobin HGB (g/L)", min_value=0, max_value=300, step=1)
+            _num("blood_rbc", "RBC hồng cầu (T/L)", min_value=0, max_value=15, step=0.01)
+            _num("blood_hct", "HCT hematocrit (L/L)", min_value=0, max_value=0.8, step=0.001)
+        with c2:
+            _num("blood_mcv", "MCV (fL)", min_value=40, max_value=160, step=0.1)
+            _num("blood_mch", "MCH (pg)", min_value=10, max_value=60, step=0.1)
+            _num("blood_mchc", "MCHC (g/L)", min_value=250, max_value=450, step=1)
+            _num("blood_rdw", "RDW-CV (%)", min_value=5, max_value=50, step=0.1)
+        with c3:
+            _num("blood_wbc", "WBC bạch cầu (×10⁹/L)", min_value=0, max_value=300, step=0.1)
+            _num("blood_plt", "PLT tiểu cầu (×10⁹/L)", min_value=0, max_value=3000, step=1)
+            _num("blood_mpv", "MPV (fL)", min_value=0, max_value=50, step=0.1)
+
+        st.subheader("Bạch cầu phân loại")
+        d1, d2 = st.columns(2)
+        with d1:
+            _num("blood_neut_pct", "NEUT% (%)", min_value=0, max_value=100, step=0.1)
+            _num("blood_lym_pct", "LYM% (%)", min_value=0, max_value=100, step=0.1)
+            _num("blood_mono_pct", "MONO% (%)", min_value=0, max_value=100, step=0.1)
+            _num("blood_eo_pct", "EO% (%)", min_value=0, max_value=100, step=0.1)
+            _num("blood_baso_pct", "BASO% (%)", min_value=0, max_value=100, step=0.1)
+        with d2:
+            _num("blood_neut_abs", "NEUT# (×10⁹/L)", min_value=0, max_value=100, step=0.1)
+            _num("blood_lym_abs", "LYM# (×10⁹/L)", min_value=0, max_value=100, step=0.1)
+            _num("blood_mono_abs", "MONO# (×10⁹/L)", min_value=0, max_value=100, step=0.1)
+            _num("blood_eo_abs", "EO# (×10⁹/L)", min_value=0, max_value=100, step=0.1)
+            _num("blood_baso_abs", "BASO# (×10⁹/L)", min_value=0, max_value=100, step=0.1)
     with urine_tab:
         u1, u2, u3 = st.columns(3)
         with u1:

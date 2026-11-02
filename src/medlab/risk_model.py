@@ -23,7 +23,7 @@ from medlab.schema import PatientInput, RiskAssessment
 
 logger = get_logger(__name__)
 
-BUNDLE_VERSION = "risk-synth-0.1.0"
+BUNDLE_VERSION = "risk-synth-0.2.0"
 
 
 def build_pipeline() -> Pipeline:

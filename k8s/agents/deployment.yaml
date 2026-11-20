@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-gateway
+  namespace: agents
+  labels:
+    app: agent-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-gateway
+  template:
+    metadata:
+      labels:
+        app: agent-gateway
+    spec:
+      serviceAccountName: agent-gateway
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: gateway
+          image: medlab-gateway:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: GATEWAY_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: agent-gateway-secret
+                  key: token
+            - name: JENKINS_URL
+              value: "http://jenkins.jenkins.svc.cluster.local:8080"
+            - name: EXTRA_HEALTH_HOSTS
+              value: "agent-gateway.agents.svc.cluster.local,medlab-insight.medlab.svc.cluster.local,jenkins.jenkins.svc.cluster.local"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

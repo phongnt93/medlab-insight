@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-gateway
+  namespace: agents
+  labels:
+    app: agent-gateway
+spec:
+  type: ClusterIP
+  selector:
+    app: agent-gateway
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

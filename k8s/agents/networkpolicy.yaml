@@ -1,0 +1,21 @@
+# Defense in depth. Note: OrbStack's k3s CNI may not enforce NetworkPolicy;
+# the gateway is also protected by bearer auth and read-only RBAC.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agent-gateway-ingress
+  namespace: agents
+spec:
+  podSelector:
+    matchLabels:
+      app: agent-gateway
+  policyTypes: ["Ingress"]
+  ingress:
+    # Kubiya Cloud egress / future bridge will be added here with IP allowlists.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000

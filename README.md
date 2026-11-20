@@ -110,6 +110,27 @@ Lưu ý: khi ArgoCD Application đang bật Auto-Sync + Self-Heal, nó sẽ kéo
 tag CI (`k8s/base/deployment.yaml`). Muốn test overlay `:local` lâu dài thì tắt
 auto-sync (`argocd app set medlab-insight --sync-policy none`) trước khi apply.
 
+## CI/CD as Code (Dagger) + AI DevOps agent
+
+Dagger chạy **song song** với Jenkins, không thay thế Jenkins/ArgoCD:
+
+```bash
+dagger call check --source=.        # ruff + 73 tests trong container sạch
+dagger call build --source=. --tag=dev
+make dagger-pipeline                # check -> build-push -> bump-manifest
+```
+
+Gateway công cụ **chỉ đọc** cho AI agent (Kubiya/Slack) nằm ở `agents/gateway`
+và deploy trong namespace `agents`:
+
+```bash
+make agent-lint agent-test agent-image agent-deploy agent-rbac-check
+kubectl -n agents port-forward svc/agent-gateway 8700:80
+```
+
+Xem chi tiết kiến trúc, guardrails và các bước Phase B (Kubiya + Slack) trong
+[`docs/agent-gateway.md`](docs/agent-gateway.md).
+
 ## Cấu trúc
 
 ```
@@ -117,8 +138,12 @@ app/            Streamlit UI
 src/medlab/     core package
 training/       synthetic data + train + MLflow
 tests/          unit/integration/UI smoke tests
+ci/             Dagger module (check/build/push/bump-manifest)
+agents/gateway  read-only DevOps tool gateway cho AI agent
+agents/slack    Slack app manifest (Phase B)
 k8s/base        manifests gốc (ArgoCD sync)
 k8s/overlays    override cho local
+k8s/agents      gateway + RBAC read-only + NetworkPolicy
 k8s/argocd      ArgoCD Application manifest
 Jenkinsfile     pipeline Jenkins + ArgoCD + Gemini
 artifacts/      model.joblib + model_card.json

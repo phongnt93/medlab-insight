@@ -1,0 +1,46 @@
+{
+  "display_information": {
+    "name": "MedLab DevOps Agent",
+    "description": "Ask about the medlab-insight cluster: pods, ArgoCD, Jenkins (read-only)",
+    "background_color": "#0b3d5c"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "medlab-devops-agent",
+      "always_online": true
+    },
+    "slash_commands": [
+      {
+        "command": "/medlab",
+        "description": "Ask the DevOps agent about the medlab-insight cluster",
+        "usage_hint": "[câu hỏi]",
+        "should_escape": false,
+        "url": "https://REPLACE-WITH-KUBIYA-REQUEST-URL"
+      }
+    ]
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "chat:write",
+        "channels:history",
+        "commands",
+        "im:history"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "request_url": "https://REPLACE-WITH-KUBIYA-REQUEST-URL",
+      "bot_events": ["app_mention", "message.im"]
+    },
+    "interactivity": {
+      "is_enabled": true,
+      "request_url": "https://REPLACE-WITH-KUBIYA-REQUEST-URL"
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": false
+  }
+}
